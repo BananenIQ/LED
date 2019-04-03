@@ -30,7 +30,7 @@ public class LED extends PApplet {
 	ArrayList<PVector> pos = new ArrayList<PVector>();
 
 	public static void main(String[] args) {
-		PApplet.main("led.LED");
+		PApplet.main("main.LED");
 	}
 
 	public void settings() {
