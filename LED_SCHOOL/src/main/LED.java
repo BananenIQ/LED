@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.Color;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -23,12 +22,14 @@ public class LED extends PApplet {
 	boolean collide;
 	boolean blink;
 	boolean imgload;
-
+	int Case = 0;
+	String color;
 	PrintWriter output;
 	PImage img;
 	String[] input;
 
 	ArrayList<PVector> pos = new ArrayList<PVector>();
+	ArrayList<Integer> group = new ArrayList<Integer>();
 
 	public static void main(String[] args) {
 		PApplet.main("main.LED");
@@ -45,6 +46,7 @@ public class LED extends PApplet {
 
 	public void setup() {
 		pos.clear();
+		group.clear();
 		input = loadStrings(posfile);
 		img = loadImage(imgfile);
 		img.resize(width, height);
@@ -55,7 +57,7 @@ public class LED extends PApplet {
 			if (frameCount % Delay == 0) {
 				toggleColor = !toggleColor;
 				for (int i = 0; i < pos.size(); i++) {
-					createLED(pos.get(i), 0); //toggleColor
+					createLED(pos.get(i), group.get(i), toggleColor);
 				}
 			}
 		}
@@ -65,8 +67,15 @@ public class LED extends PApplet {
 			background(255);
 		}
 		for (int i = 0; i < pos.size(); i++) {
-			createLED(pos.get(i), 0); //toggleColor
+			createLED(pos.get(i), group.get(i), toggleColor);
 		}
+
+		if (Case == 0) {
+			color = "Color: Black [Please change to an other color by pressing (1-8).]";
+		}
+		textSize(20);
+		fill(0);
+		text(color, width * 1 / 100, height * 1 / 50);
 	}
 
 	public void mousePressed() {
@@ -74,8 +83,9 @@ public class LED extends PApplet {
 			if (onCollide()) {
 				println("[Collision] sorry, but to close!");
 			} else {
-				pos.add(new PVector(mouseX, mouseY,diameter));
-				createLED(pos.get(pos.size() - 1), 0);
+				pos.add(new PVector(mouseX, mouseY, diameter));
+				createLED(pos.get(pos.size() - 1), Case, false);
+				group.add(new Integer(Case));
 			}
 		} else if (mouseButton == RIGHT) {
 			deleteLED();
@@ -83,40 +93,109 @@ public class LED extends PApplet {
 	}
 
 	public void keyPressed() {
-		if (key == 'x') {
+
+		switch (key) {
+		case 'x':
 			deleteLED();
-		}
-		if (key == DELETE) {
+			break;
+		case DELETE:
 			setup();
-		}
-		if (key == 'n') {
+			break;
+		case 'n':
 			println("[INFO] You create a new file!");
 			output = createWriter(posfile);
-		}
-		if (key == 's') {
+			break;
+		case 's':
 			savePattern();
-		}
-		if (key == 'l') {
+			break;
+		case 'l':
 			loadPattern();
-		}
-		if (key == 'b') {
+			break;
+		case 'b':
 			blink = !blink;
-		}
-		if (key == 'p') {
+			break;
+		case 'p':
 			imgload = !imgload;
+			break;
+		case '1':
+			color = "Color: RED";
+			Case = 1;
+			break;
+		case '2':
+			color = "Color: GREEN";
+			Case = 2;
+			break;
+		case '3':
+			color = "Color: BLUE";
+			Case = 3;
+			break;
+		case '4':
+			color = "Color: YELLOW";
+			Case = 4;
+			break;
+		case '5':
+			color = "Color: ORANGE";
+			Case = 5;
+			break;
+		case ESC:
+			exit();
+			break;
+
+		default:
+			println("[KEY] This key is invalid!");
+			break;
 		}
 	}
 
-	public void createLED(PVector loc, int b) {
-		switch (b) {
-		case 1:
+	public void createLED(PVector loc, int color, boolean toggleStatus) {
+		switch (color) {
+		case 0: // black
+			fill(0);
+			break;
+		case 1: // red
+			if (toggleStatus) {
+				fill(100, 0, 0);
+			} else {
+				fill(255, 0, 0);
+			}
+			break;
+		case 2: // green
+			if (toggleStatus) {
+				fill(0, 100, 0);
+			} else {
+				fill(0, 255, 0);
+			}
+			break;
+		case 3: // blue
+			if (toggleStatus) {
+				fill(0, 0, 100);
+			} else {
+				fill(0, 0, 255);
+			}
+			break;
+		case 4: // yellow
+			if (toggleStatus) {
+				fill(100, 100, 0);
+			} else {
+				fill(255, 255, 0);
+			}
+			break;
+		case 5: // orange
+			if (toggleStatus) {
+				fill(100, 60, 20);
+			} else {
+				fill(255, 153, 51);
+			}
+			break;
 		}
+		noStroke();
 		ellipse(loc.x, loc.y, loc.z, loc.z);
 	}
 
 	public void deleteLED() {
 		for (int i = 0; i < pos.size(); i++) {
-			if ((dist(pos.get(i).x, pos.get(i).y, mouseX, mouseY) <= diameter / 2)) {
+			if (di(pos.get(i), mouseX, mouseY, diameter / 2)) {
+				group.remove(i);
 				pos.remove(i);
 				if (imgload) {
 					background(img);
@@ -127,13 +206,13 @@ public class LED extends PApplet {
 			}
 		}
 		for (int i = 0; i < pos.size(); i++) {
-			createLED(pos.get(i), 0);
+			createLED(pos.get(i), group.get(i), false);
 		}
 	}
 
 	boolean onCollide() {
 		for (int i = 0; i < pos.size(); i++) {
-			if ((dist(pos.get(i).x, pos.get(i).y, mouseX, mouseY) >= distance)) {
+			if (!(di(pos.get(i), mouseX, mouseY, distance))) {
 				collide = false;
 			} else {
 				collide = true;
@@ -147,14 +226,15 @@ public class LED extends PApplet {
 		if (!(pos.isEmpty())) {
 			output = createWriter("LED.txt");
 			for (int i = 0; i < pos.size(); i++) {
-				output.println(
-						ceil(pos.get(i).x) / factor + ";" + ceil(pos.get(i).y) / factor + ";" + ceil(pos.get(i).z) / factor);
+				output.println(ceil(pos.get(i).x) / factor + ";" + ceil(pos.get(i).y) / factor + ";"
+						+ ceil(pos.get(i).z) / factor + ";" + group.get(i));
 			}
 			output.flush();
 			output.close();
 			if (debug) {
 				for (int i = 0; i < pos.size(); i++) {
-					println("[Data saved]" + " At: " + "[ x: " + pos.get(i).x + " y: " + pos.get(i).y + " ]");
+					println("[Data saved]" + " At: " + "[ x: " + pos.get(i).x + " y: " + pos.get(i).y + " diameter: "
+							+ pos.get(i).z + " case: " + group.get(i) + "]");
 				}
 			} else {
 				println("[Data saved]");
@@ -171,12 +251,14 @@ public class LED extends PApplet {
 			for (int i = 0; i < input.length; i++) {
 				if (index < input.length) {
 					String[] para = split(input[index], ';');
-					if (para.length == 3) {
+					if (para.length == 4) {
 						int x = Integer.parseInt(para[0]);
 						int y = Integer.parseInt(para[1]);
 						int r = Integer.parseInt(para[2]);
+						String c = (para[3]);
 						pos.add(new PVector(x * factor, y * factor, r * factor));
-						createLED(pos.get(index), 0);
+						group.add(new Integer(c));
+						createLED(pos.get(index), group.get(index), false);
 						index++;
 					}
 				}
@@ -188,6 +270,24 @@ public class LED extends PApplet {
 			}
 		} catch (Exception e) {
 			println("[ERROR] Please create fist a file or save a pattern");
+		}
+	}
+
+	boolean di(PVector p1, int x2, int y2, int maxvalue) {
+		int x = (int) (p1.x - x2);
+		int y = (int) (p1.y - y2);
+		if (x < 0) {
+			x *= -1;
+		}
+		if (y < 0) {
+			y *= -1;
+		}
+		double di = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+		
+		if (di <= maxvalue) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 }
