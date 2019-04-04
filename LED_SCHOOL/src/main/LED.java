@@ -110,7 +110,6 @@ public class LED extends PApplet {
 	public void createLED(PVector loc, int b) {
 		switch (b) {
 		case 1:
-			
 		}
 		ellipse(loc.x, loc.y, loc.z, loc.z);
 	}
