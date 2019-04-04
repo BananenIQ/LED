@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.Color;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -11,10 +12,10 @@ public class LED extends PApplet {
 	final boolean debug = true;
 	final String imgfile = "Bananen.jpg";
 	final String posfile = "LED.txt";
-	int factor = 3;
+	int factor = 5;
 	int size_w = 300 * factor;
 	int size_h = 300 * factor;
-	int distance = 10 * factor;
+	int distance = 5 * factor;
 	int diameter = 5 * factor;
 	final int Delay = 50;
 
@@ -39,7 +40,7 @@ public class LED extends PApplet {
 		} else {
 			size(size_w, size_h);
 		}
-		smooth(5);
+		smooth(3);
 	}
 
 	public void setup() {
@@ -54,7 +55,7 @@ public class LED extends PApplet {
 			if (frameCount % Delay == 0) {
 				toggleColor = !toggleColor;
 				for (int i = 0; i < pos.size(); i++) {
-					createLED(pos.get(i), diameter, toggleColor);
+					createLED(pos.get(i), 0); //toggleColor
 				}
 			}
 		}
@@ -64,7 +65,7 @@ public class LED extends PApplet {
 			background(255);
 		}
 		for (int i = 0; i < pos.size(); i++) {
-			createLED(pos.get(i), diameter, toggleColor);
+			createLED(pos.get(i), 0); //toggleColor
 		}
 	}
 
@@ -73,8 +74,8 @@ public class LED extends PApplet {
 			if (onCollide()) {
 				println("[Collision] sorry, but to close!");
 			} else {
-				pos.add(new PVector(mouseX, mouseY));
-				createLED(pos.get(pos.size() - 1), diameter, false);
+				pos.add(new PVector(mouseX, mouseY,diameter));
+				createLED(pos.get(pos.size() - 1), 0);
 			}
 		} else if (mouseButton == RIGHT) {
 			deleteLED();
@@ -106,15 +107,12 @@ public class LED extends PApplet {
 		}
 	}
 
-	public void createLED(PVector loc, int b, boolean color) {
-		if (color) {
-			fill(255, 0, 0);
-		} else {
-			fill(0);
+	public void createLED(PVector loc, int b) {
+		switch (b) {
+		case 1:
+			
 		}
-		stroke(0);
-		strokeWeight(3);
-		ellipse(loc.x, loc.y, b, b);
+		ellipse(loc.x, loc.y, loc.z, loc.z);
 	}
 
 	public void deleteLED() {
@@ -130,7 +128,7 @@ public class LED extends PApplet {
 			}
 		}
 		for (int i = 0; i < pos.size(); i++) {
-			createLED(pos.get(i), diameter, false);
+			createLED(pos.get(i), 0);
 		}
 	}
 
@@ -151,7 +149,7 @@ public class LED extends PApplet {
 			output = createWriter("LED.txt");
 			for (int i = 0; i < pos.size(); i++) {
 				output.println(
-						ceil(pos.get(i).x) / factor + ";" + ceil(pos.get(i).y) / factor + ";" + diameter / factor);
+						ceil(pos.get(i).x) / factor + ";" + ceil(pos.get(i).y) / factor + ";" + ceil(pos.get(i).z) / factor);
 			}
 			output.flush();
 			output.close();
@@ -178,8 +176,8 @@ public class LED extends PApplet {
 						int x = Integer.parseInt(para[0]);
 						int y = Integer.parseInt(para[1]);
 						int r = Integer.parseInt(para[2]);
-						pos.add(new PVector(x * factor, y * factor));
-						createLED(pos.get(index), r * factor, false);
+						pos.add(new PVector(x * factor, y * factor, r * factor));
+						createLED(pos.get(index), 0);
 						index++;
 					}
 				}
