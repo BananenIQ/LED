@@ -117,6 +117,9 @@ public class LED extends PApplet {
 		case 'p':
 			imgload = !imgload;
 			break;
+		case 'r':
+			replace();
+			break;
 		case '1':
 			color = "Color: RED";
 			Case = 1;
@@ -140,7 +143,6 @@ public class LED extends PApplet {
 		case ESC:
 			exit();
 			break;
-
 		default:
 			println("[KEY] This key is invalid!");
 			break;
@@ -273,6 +275,23 @@ public class LED extends PApplet {
 		}
 	}
 
+	void replace() {
+		for (int i = 0; i < pos.size(); i++) {
+			if (di(pos.get(i), mouseX, mouseY, diameter / 2)) {
+				group.set(i, Case);
+				if (imgload) {
+					background(img);
+				} else {
+					background(255);
+				}
+				break;
+			}
+		}
+		for (int i = 0; i < pos.size(); i++) {
+			createLED(pos.get(i), group.get(i), false);
+		}
+	}
+
 	boolean di(PVector p1, int x2, int y2, int maxvalue) {
 		int x = (int) (p1.x - x2);
 		int y = (int) (p1.y - y2);
@@ -283,7 +302,7 @@ public class LED extends PApplet {
 			y *= -1;
 		}
 		double di = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-		
+
 		if (di <= maxvalue) {
 			return true;
 		} else {
